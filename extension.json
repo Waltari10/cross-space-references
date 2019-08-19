@@ -1,0 +1,8 @@
+{
+  "id": "cross-space-references",
+  "name": "cross-space-references",
+  "srcdoc": "./build/index.html",
+  "fieldTypes": [
+    "Object"
+  ]
+}
