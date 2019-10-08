@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ReactDOM from 'react-dom'
-import { Button } from '@contentful/forma-36-react-components'
+import { Button, Spinner } from '@contentful/forma-36-react-components'
 import { init, locations } from 'contentful-ui-extensions-sdk'
 import '@contentful/forma-36-react-components/dist/styles.css'
 import './index.css'
@@ -139,7 +139,7 @@ export class App extends React.Component {
   render() {
     const { loading, showEntryPicker, entries } = this.state
 
-    if (loading) return (<p>Loading...</p>)
+    if (loading) return (<main><Spinner /></main>)
 
     if (showEntryPicker) return (<EntryPicker onBack={this.toggleEntryPicker} onOpenEntry={this.openEntry} onSelectEntry={this.addEntry} sdks={this.state.sdks} sdk={this.props.sdk} />)
 

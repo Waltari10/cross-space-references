@@ -1,8 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Select from 'react-select'
-import { Button, Dropdown, DropdownList, DropdownListItem, FormLabel, TextInput } from '@contentful/forma-36-react-components'
+import { Spinner, Button, Dropdown, DropdownList, DropdownListItem, FormLabel, TextInput } from '@contentful/forma-36-react-components'
 import EntryList from './EntryList'
+import { debounce } from 'lodash'
 
 export default class EntryPicker extends React.Component {
   static propTypes = {
@@ -31,7 +32,8 @@ export default class EntryPicker extends React.Component {
 
     this.selectSpaceSdk = this.selectSpaceSdk.bind(this)
     this.selectContentType = this.selectContentType.bind(this)
-    this.addSearchTerm = this.addSearchTerm.bind(this)
+    this.debouncedAddSearchTerm = debounce(this.addSearchTerm.bind(this), 300, {trailing: true})
+    this.addSearchTerm = (e) => e.persist() || this.debouncedAddSearchTerm(e)
   }
 
   componentDidMount() {
@@ -93,7 +95,10 @@ export default class EntryPicker extends React.Component {
     this.setState({entries, loading: false})
   }
 
-  async addSearchTerm({ target }) {
+  async addSearchTerm(e) {
+    e.persist()
+    const target = e.target
+
     this.setState({searchTerm: target.value, loading: true})
 
     const { spaceSdk, contentType } = this.state
@@ -128,7 +133,7 @@ export default class EntryPicker extends React.Component {
         {!spaceSdk && <p>Select a source space...</p>}
         {spaceSdk && !contentType && <p>Select a content type...</p>}
 
-        {loading && <p>Loading...</p>}
+        {loading && <main><Spinner /></main>}
         {entries && contentType && !loading && <EntryList entries={this.state.entries} onOpenEntry={this.props.onOpenEntry} onSelectEntry={this.props.onSelectEntry} />}
         <Button icon="ChevronLeft" onClick={this.props.onBack}>
           Go back
