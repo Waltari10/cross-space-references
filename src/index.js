@@ -1,13 +1,29 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ReactDOM from 'react-dom'
-import { Button, Spinner } from '@contentful/forma-36-react-components'
+import { Button, Spinner, Heading, Paragraph } from '@contentful/forma-36-react-components'
+import { css } from 'emotion'
+import tokens from '@contentful/forma-36-tokens'
 import { init, locations } from 'contentful-ui-extensions-sdk'
 import '@contentful/forma-36-react-components/dist/styles.css'
 import './index.css'
 import { createClient } from 'contentful'
 import EntryList from './EntryList'
 import EntryPicker from './EntryPicker'
+import Config from './Config'
+import CrossSpaceConfigDialog from './CrossSpaceConfigDialog'
+
+const styles = {
+  paragraph: css({
+    marginBottom: tokens.spacingL
+  }),
+  smallParagraph: css({
+    marginBottom: tokens.spacingXs
+  }),
+  addReferenceButton: css({
+    marginBottom: tokens.spacingXl
+  })
+}
 
 export class App extends React.Component {
   static propTypes = {
@@ -34,11 +50,9 @@ export class App extends React.Component {
   }
 
   buildSdksFor(space) {
-    const defaultLocale = this.props.sdk.locales.default
-
-    const spaceId = space.fields.spaceId[defaultLocale]
-    const identifier = space.fields.identifier[defaultLocale]
-    const deliveryToken = space.fields.deliveryToken[defaultLocale]
+    const spaceId = space.spaceId
+    const identifier = space.identifier
+    const deliveryToken = space.deliveryToken
 
     return {
       identifier,
@@ -62,12 +76,12 @@ export class App extends React.Component {
       contentType = await sdks.delivery.getContentType(actualEntry.sys.contentType.sys.id)
 
       let contentTypes = {...this.state.contentTypes}
-      contentTypes[`${entry.spaceId}`] = [...contentTypeCache, contentType]
+      contentTypes[entry.spaceId] = [...contentTypeCache, contentType]
       this.setState({contentTypes})
     }
 
     return {
-      title: actualEntry.fields[contentType.displayField],
+      title: actualEntry.fields[contentType.displayField] || "Untitled",
       contentTypeName: contentType.name,
       spaceId: entry.spaceId,
       spaceName: sdks.identifier,
@@ -93,8 +107,8 @@ export class App extends React.Component {
   async componentDidMount() {
     this.props.sdk.window.startAutoResizer()
 
-    const spaces = await this.props.sdk.space.getEntries({content_type: 'crossSpaceConfiguration'})
-    const sdks = spaces.items.map(s => this.buildSdksFor(s))
+    const spaces = this.props.sdk.parameters.installation.crossSpaceConfigurations || []
+    const sdks = spaces.map(s => this.buildSdksFor(s))
 
     const entries = await this.buildEntries([...this.state.value.entries], sdks)
 
@@ -141,23 +155,39 @@ export class App extends React.Component {
 
     if (loading) return (<main><Spinner /></main>)
 
-    if (showEntryPicker) return (<EntryPicker onBack={this.toggleEntryPicker} onOpenEntry={this.openEntry} onSelectEntry={this.addEntry} sdks={this.state.sdks} sdk={this.props.sdk} />)
-
     return (
       <>
-        <Button icon="PlusCircle" onClick={this.toggleEntryPicker}>Add Entry</Button>
-        <EntryList entries={this.state.entries} onOpenEntry={this.openEntry} onRemoveEntry={this.removeEntry} />
-        <p><small><i>When opening an entry in a new tab, you may not have the permissions required to view it</i></small></p>
+        <Heading>Cross-space reference</Heading>
+        <Paragraph className={styles.paragraph}>Search and select entries from other spaces. Note that you may not have permissions to view all entries you add.</Paragraph>
+
+      { showEntryPicker ? <EntryPicker onBack={this.toggleEntryPicker} onOpenEntry={this.openEntry} onSelectEntry={this.addEntry} sdks={this.state.sdks} sdk={this.props.sdk} /> : (
+        <>
+          <div className={styles.addReferenceButton}>
+            <Button onClick={this.toggleEntryPicker}>Add a reference</Button>
+          </div>
+          { entries && (
+            <>
+              <Paragraph className={styles.smallParagraph}><b>All references</b></Paragraph>
+              <EntryList entries={entries} onOpenEntry={this.openEntry} onRemoveEntry={this.removeEntry} />
+            </>
+          )}
+        </>
+      )}
       </>
     )
   }
 }
 
 init(sdk => {
+  let Component
   if (sdk.location.is(locations.LOCATION_APP)) {
-    return ReactDOM.render(<p>Hi</p>, document.getElementById('root'))
+    Component = Config
+  } else if (sdk.location.is(locations.LOCATION_DIALOG)) {
+    Component = CrossSpaceConfigDialog
+  } else {
+    Component = App
   }
-  ReactDOM.render(<App sdk={sdk} />, document.getElementById('root'))
+  ReactDOM.render(<Component sdk={sdk} />, document.getElementById('root'))
 })
 
 /**

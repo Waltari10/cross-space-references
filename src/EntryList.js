@@ -1,5 +1,22 @@
 import React from 'react'
-import { EntryCard, DropdownList, DropdownListItem } from '@contentful/forma-36-react-components'
+import { css } from 'emotion'
+import { EntityList, EntityListItem, DropdownList, DropdownListItem } from '@contentful/forma-36-react-components'
+
+const styles = {
+  entry: css({
+    figure: css({
+      display: 'none'
+    })
+  })
+}
+
+const DescriptionLabel = ({spaceName, spaceId}) => {
+  return (
+    <span>
+      {spaceName} (<code>{spaceId}</code>)
+    </span>
+  )
+}
 
 export default function EntryList ({entries, onSelectEntry, onRemoveEntry, onOpenEntry}) {
   if (!entries || entries.length === 0) {
@@ -11,14 +28,15 @@ export default function EntryList ({entries, onSelectEntry, onRemoveEntry, onOpe
   }
 
   return (
-    <>
+    <EntityList>
     {entries.map((e, i) => {
-      return <EntryCard
+      return <EntityListItem
+        className={styles.entry}
         key={`${i}-${e.id}`}
         title={e.title}
-        status={"published"}
+        status={ e.id ? "published" : "draft" }
         contentType={e.contentTypeName}
-        description={`Space (${e.spaceName}) - ID: ${e.spaceId}`}
+        description={<DescriptionLabel spaceName={e.spaceName} spaceId={e.spaceId} />}
         onClick={!onSelectEntry ? undefined : async () => await onSelectEntry(e)}
         dropdownListElements={!(onRemoveEntry || onOpenEntry) ? undefined : (
             <DropdownList>
@@ -29,6 +47,6 @@ export default function EntryList ({entries, onSelectEntry, onRemoveEntry, onOpe
         }
       />
     })}
-    </>
+    </EntityList>
   )
 }

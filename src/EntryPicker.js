@@ -1,9 +1,20 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Select from 'react-select'
-import { Spinner, Button, Dropdown, DropdownList, DropdownListItem, FormLabel, TextInput } from '@contentful/forma-36-react-components'
+import { Card, Subheading, Spinner, IconButton, FormLabel, TextInput } from '@contentful/forma-36-react-components'
 import EntryList from './EntryList'
 import { debounce } from 'lodash'
+import { css } from 'emotion'
+
+const styles = {
+  subheading: css({
+    display: 'flex',
+    alignItems: 'center'
+  }),
+  closeButton: css({
+    marginLeft: 'auto'
+  })
+}
 
 export default class EntryPicker extends React.Component {
   static propTypes = {
@@ -45,7 +56,7 @@ export default class EntryPicker extends React.Component {
     const contentType = this.state.contentTypes.find(ct => ct.id === actualEntry.sys.contentType.sys.id)
 
     return {
-      title: actualEntry.fields[contentType.displayField],
+      title: actualEntry.fields[contentType.displayField] || "Untitled",
       contentTypeName: contentType.name,
       spaceId: actualEntry.sys.space.sys.id,
       spaceName: spaceSdk.identifier,
@@ -117,28 +128,26 @@ export default class EntryPicker extends React.Component {
     const contentTypeOptions = contentTypes.map((ct) => { return {value: ct.id, label: ct.name} })
 
     return (
-      <>
+      <Card>
+        <Subheading className={styles.subheading}>
+          Add a reference
+          <IconButton className={styles.closeButton} label="Go back" iconProps={{icon: 'Close'}} onClick={this.props.onBack} />
+        </Subheading>
+
         <FormLabel required>Source space</FormLabel>
         <Select options={spaceOptions} selectedOption={selectedSpaceOption} onChange={this.selectSpaceSdk} />
-        <br></br>
+        <br />
 
         <FormLabel required>Content type</FormLabel>
         <Select options={contentTypeOptions} selectedOption={selectedContentType} onChange={this.selectContentType} />
-        <br></br>
+        <br />
 
-        <FormLabel>Search parameters</FormLabel>
+        <FormLabel>Search for entry by keyword</FormLabel>
         <TextInput name="searchTerm" type="text" value={this.state.searchTerm} onChange={this.addSearchTerm} />
-        <br></br>
-
-        {!spaceSdk && <p>Select a source space...</p>}
-        {spaceSdk && !contentType && <p>Select a content type...</p>}
 
         {loading && <main><Spinner /></main>}
         {entries && contentType && !loading && <EntryList entries={this.state.entries} onOpenEntry={this.props.onOpenEntry} onSelectEntry={this.props.onSelectEntry} />}
-        <Button icon="ChevronLeft" onClick={this.props.onBack}>
-          Go back
-        </Button>
-      </>
+      </Card>
     )
   }
 }
