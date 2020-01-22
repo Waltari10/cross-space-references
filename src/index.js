@@ -47,6 +47,7 @@ export class App extends React.Component {
     this.addEntry = this.addEntry.bind(this)
     this.removeEntry = this.removeEntry.bind(this)
     this.toggleEntryPicker = this.toggleEntryPicker.bind(this)
+    this.openEntry = this.openEntry.bind(this)
   }
 
   buildSdksFor(space) {
@@ -66,7 +67,6 @@ export class App extends React.Component {
 
   async buildEntry(entry, initialSdks) {
     const sdks = (initialSdks || this.state.sdks).find(sdk => sdk.spaceId === entry.spaceId)
-
     const actualEntry = await sdks.delivery.getEntry(entry.id)
 
     let contentTypeCache = this.state.contentTypes[entry.spaceId] || []
@@ -109,7 +109,6 @@ export class App extends React.Component {
 
     const spaces = this.props.sdk.parameters.installation.crossSpaceConfigurations || []
     const sdks = spaces.map(s => this.buildSdksFor(s))
-
     const entries = await this.buildEntries([...this.state.value.entries], sdks)
 
     this.setState({ entries, sdks, loading: false })
@@ -119,7 +118,7 @@ export class App extends React.Component {
     const entries = [...this.state.entries, await this.buildEntry(entry)]
 
     await this.props.sdk.field.setValue({entries})
-    this.setState({entries, value: this.props.sdk.field.getValue(), showEntryPicker: false})
+    this.setState({entries, value: {entries}, showEntryPicker: false})
   }
 
   async removeEntry(entry) {
@@ -143,7 +142,7 @@ export class App extends React.Component {
   }
 
   openEntry(entry) {
-    window.open(`https://app.contentful.com/spaces/${entry.spaceId}/entries/${entry.id}`, '_blank')
+    window.open(`https://app.contentful.com/spaces/${entry.spaceId}/environments/${this.props.sdk.ids.environment}/entries/${entry.id}`, '_blank')
   }
 
   async toggleEntryPicker() {

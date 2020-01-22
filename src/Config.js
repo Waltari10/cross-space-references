@@ -80,8 +80,7 @@ export default class Config extends React.Component {
   }
 
   async editEntry(entry) {
-    const updatedEntry = await this.props.sdk.dialogs.openExtension({
-      id: 'cross-space-references',
+    const updatedEntry = await this.props.sdk.dialogs.openCurrentApp({
       position: 'center',
       title: 'Edit Space Configuration',
       parameters: {entry}
@@ -99,8 +98,7 @@ export default class Config extends React.Component {
   }
 
   async addSpaceConfiguration({ entry }) {
-    const config = await this.props.sdk.dialogs.openExtension({
-      id: 'cross-space-references',
+    const config = await this.props.sdk.dialogs.openCurrentApp({
       position: 'center',
       title: 'Add Space Configuration',
       parameters: {entry}
@@ -112,7 +110,7 @@ export default class Config extends React.Component {
 
   onConfigure() {
     if (this.state.crossSpaceConfigurations.length === 0) {
-      return false
+      return true
     }
 
     let crossSpaceConfigurations = this.state.crossSpaceConfigurations.map(config => {
