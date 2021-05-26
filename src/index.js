@@ -107,9 +107,21 @@ export class App extends React.Component {
 
   async componentDidMount() {
     this.props.sdk.window.startAutoResizer()
+    const spaceId = this.props.sdk.parameters.installation.spaceId;
+    const identifier = this.props.sdk.parameters.installation.identifier;
+    const deliveryToken = this.props.sdk.parameters.installation.deliveryToken;
 
-    const spaces = this.props.sdk.parameters.installation.crossSpaceConfigurations || []
-    const sdks = spaces.map(s => this.buildSdksFor(s))
+    const sdk = {
+      identifier,
+      spaceId,
+      delivery: createClient({
+        space: spaceId,
+        accessToken: deliveryToken
+      })
+    }
+
+    const sdks = [sdk];
+    
     const entries = await this.buildEntries([...this.state.value.entries], sdks)
 
     this.setState({ entries, sdks, loading: false })
@@ -152,6 +164,8 @@ export class App extends React.Component {
 
   render() {
     const { loading, showEntryPicker, entries } = this.state
+
+    console.log(this.props.sdk.parameters)
 
     if (loading) return (<main><Spinner /></main>)
 

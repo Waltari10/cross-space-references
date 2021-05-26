@@ -4,5 +4,31 @@
   "srcdoc": "./build/index.html",
   "fieldTypes": [
     "Object"
-  ]
+  ],
+  "parameters": {
+    "installation": [
+      {
+        "id": "spaceId",
+        "type": "Symbol",
+        "name": "spaceId",
+        "description": "Id of the space to connect to",
+        "required": true
+      },
+      {
+        "id": "identifier",
+        "type": "Symbol",
+        "name": "space name",
+        "description": "Name of the space to connect to",
+        "required": true,
+        "default": "Shared"
+      },
+      {
+        "id": "deliveryToken",
+        "type": "Symbol",
+        "name": "deliveryToken",
+        "description": "Space access token",
+        "required": true
+      }
+    ]
+  }
 }
