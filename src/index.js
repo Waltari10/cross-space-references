@@ -165,8 +165,6 @@ export class App extends React.Component {
   render() {
     const { loading, showEntryPicker, entries } = this.state
 
-    console.log(this.props.sdk.parameters)
-
     if (loading) return (<main><Spinner /></main>)
 
     return (
