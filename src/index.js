@@ -25,6 +25,7 @@ const styles = {
   })
 }
 
+
 export class App extends React.Component {
   static propTypes = {
     sdk: PropTypes.object.isRequired
